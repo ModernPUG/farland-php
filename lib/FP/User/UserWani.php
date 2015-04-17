@@ -35,7 +35,7 @@ class UserWani extends \FP\Character\Character
         }
         $this->myTurn++;
 
-        if ($this->getHp() < 20) {
+        if ($this->getHp() < 10) {
             $direction = $this->getDirectionNullWay($map, $x, $y);
             return new Action('move', $direction);
         }
