@@ -8,11 +8,11 @@ class UserWani extends \FP\Character\Character
     const MAP_X_MAX = 10;
     const MAP_Y_MAX = 8;
 
-	protected $myTurn = 0;
-	protected $myStartX = 0;
-	protected $myStartY = 0;
+    protected $myTurn = 0;
+    protected $myStartX = 0;
+    protected $myStartY = 0;
 
-	protected $myDirection = 'right';
+    protected $myDirection = 'right';
 
     /**
      * @param $map
@@ -70,7 +70,7 @@ class UserWani extends \FP\Character\Character
             if ($x != static::MAP_X_MAX - 1 && !isset($map[$y][$x+1])) {
                 return 'right';
             }
-            if ($y != static::MAP_Y_MAX && !isset($map[$y+1][$x])) {
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
                 return 'bottom';
             }
         }
@@ -81,7 +81,7 @@ class UserWani extends \FP\Character\Character
             if ($x != static::MAP_X_MAX - 1 && !isset($map[$y][$x+1])) {
                 return 'right';
             }
-            if ($y != static::MAP_Y_MAX && !isset($map[$y+1][$x])) {
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
                 return 'bottom';
             }
             if ($x != 0 && !isset($map[$y][$x-1])) {
@@ -92,7 +92,7 @@ class UserWani extends \FP\Character\Character
             if ($x != static::MAP_X_MAX - 1 && !isset($map[$y][$x+1])) {
                 return 'right';
             }
-            if ($y != static::MAP_Y_MAX && !isset($map[$y+1][$x])) {
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
                 return 'bottom';
             }
             if ($x != 0 && !isset($map[$y][$x-1])) {
@@ -103,7 +103,7 @@ class UserWani extends \FP\Character\Character
             }
         }
         if ($this->lastDirection === 'bottom') {
-            if ($y != static::MAP_Y_MAX && !isset($map[$y+1][$x])) {
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
                 return 'bottom';
             }
             if ($x != 0 && !isset($map[$y][$x-1])) {
@@ -121,8 +121,7 @@ class UserWani extends \FP\Character\Character
 
     protected function getDirectionByOtherPositions($map, $myX, $myY)
     {
-        $team = $this->getMyTeam();
-        $otherUsers = $this->getOthersideUserPositons($map, $myX, $myY);
+        $otherUsers = $this->getEnemysPosition($map);
 
         $shortestDistance = 100000;
         $shortestUser = $otherUsers[0];
@@ -153,7 +152,11 @@ class UserWani extends \FP\Character\Character
         return abs($info['x'] - $otherUser['x']) + abs($info['y'] - $otherUser['y']);
     }
 
-    protected function getOthersideUserPositons($map, $myX, $myY)
+    /**
+     * @param $map
+     * @return array
+     */
+    protected function getEnemysPosition($map)
     {
         $users = [];
         $team = $this->getMyTeam();
@@ -167,6 +170,11 @@ class UserWani extends \FP\Character\Character
         return $users;
     }
 
+    /**
+     * @param $x
+     * @param $y
+     * @return string
+     */
     protected function isEdge($x, $y)
     {
         if ($x >= 9) return 'right';
@@ -218,10 +226,10 @@ class UserWani extends \FP\Character\Character
     protected function getOtherTeamByUser($user)
     {
         if (isset($user['team'])) {
-    		return $user['team'];
-    	}
-    	return '?';
-    	return $user['team'];
+            return $user['team'];
+        }
+        return '?';
+        return $user['team'];
     }
 
 
@@ -230,6 +238,7 @@ class UserWani extends \FP\Character\Character
         $info = $this->info();
         return $info['hp'];
     }
+
 
 
     private $lastAction = null;
@@ -248,5 +257,4 @@ class UserWani extends \FP\Character\Character
         $this->lastDirection = $direction;
         return new Action('attack', $direction);
     }
-
 }
