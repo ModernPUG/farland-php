@@ -38,13 +38,7 @@ class Lhs extends \FP\Character\Character
         $this->findWeakEnemy();
 
         //error_log('weak x:'.$this->weakEnemy['x']. ', weak y: '. $this->weakEnemy['y']);
-        //$this->moveToWeakEnemy();
-
-        if(!$this->checkCanGo()){
-            while(!$this->checkCanGo()){
-                $this->lhsSwitchDirection();
-            }
-        }
+        $this->moveToWeakEnemy();
 
         return $this->lhsMove();
     }
@@ -56,7 +50,101 @@ class Lhs extends \FP\Character\Character
 
     function chooseDirection()
     {
-        $distanceX = $this->me['x'] - $this->weakEnemy['x'];
+        $result = '';
+
+        $distanceX = abs($this->me['x'] - $this->weakEnemy['x']);
+        $distanceY = abs($this->me['y'] - $this->weakEnemy['y']);
+
+        //
+        if($distanceX > $distanceY) {
+            if($this->me['y'] > $this->weakEnemy['y']) {
+                //try move to top
+                if($this->me['top'] || $this->me['y'] > 0){
+                    $this->me['direction'] == 'top';
+                    exit;
+                }
+            } else {
+                //try move to bottom
+                if($this->me['bottom'] || $this->me['y'] < 7){
+                    $this->me['direction'] == 'bottom';
+                    exit;
+                }
+            }
+
+            if($this->me['x'] > $this->weakEnemy['x']) {
+                //try move to left
+                if($this->me['left'] || $this->me['x'] > 0){
+                    $this->me['direction'] == 'left';
+                    exit;
+                }
+            } else {
+                //try move to right
+                if($this->me['right'] || $this->me['x'] < 9){
+                    $this->me['direction'] == 'right';
+                    exit;
+                }
+            }
+        } else {
+            if($this->me['x'] > $this->weakEnemy['x']) {
+                //try move to left
+                if($this->me['left'] || $this->me['x'] > 0){
+                    $this->me['direction'] == 'left';
+                    exit;
+                }
+            } else {
+                //try move to right
+                if($this->me['right'] || $this->me['x'] < 9){
+                    $this->me['direction'] == 'right';
+                    exit;
+                }
+            }
+
+            if($this->me['y'] > $this->weakEnemy['y']) {
+                //try move to top
+                if($this->me['top'] || $this->me['y'] > 0){
+                    $this->me['direction'] == 'top';
+                    exit;
+                }
+            } else {
+                //try move to bottom
+                if($this->me['bottom'] || $this->me['y'] < 7){
+                    $this->me['direction'] == 'bottom';
+                    exit;
+                }
+            }
+        }
+
+        if(!$result){
+            if($distanceX > $distanceY) {
+                if($this->me['x'] > $this->weakEnemy['x']) {
+                    //try move to left
+                    if($this->me['left'] || $this->me['x'] > 0){
+                        $this->me['direction'] == 'left';
+                        exit;
+                    }
+                } else {
+                    //try move to right
+                    if($this->me['right'] || $this->me['x'] < 9){
+                        $this->me['direction'] == 'right';
+                        exit;
+                    }
+                }
+            } else {
+                if($this->me['y'] > $this->weakEnemy['y']) {
+                    //try move to top
+                    if($this->me['top'] || $this->me['y'] > 0){
+                        $this->me['direction'] == 'top';
+                        exit;
+                    }
+                } else {
+                    //try move to bottom
+                    if($this->me['bottom'] || $this->me['y'] < 7){
+                        $this->me['direction'] == 'bottom';
+                        exit;
+                    }
+                }
+            }
+        }
     }
 
     function findWeakEnemy()
