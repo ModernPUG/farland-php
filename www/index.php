@@ -1,6 +1,9 @@
 <?php
 require_once '../vendor/autoload.php';
 
+error_reporting(E_CORE_ERROR);
+ini_set("display_errors", 1);
+
 $map = new \FP\Map();
 
 $player01 = new \FP\User\Lhs($map, 1, 'Lhs', 1);
