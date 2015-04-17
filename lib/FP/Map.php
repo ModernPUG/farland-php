@@ -41,15 +41,17 @@ class Map
 
         $info = $character->info();
 
-        for ($y = 0; $y < self::TILE_COUNT_Y; $y++) {
+        for ($y = 1; $y < self::TILE_COUNT_Y; $y = $y + 2) {
             if ($info['team'] == 1) {
                 $x = 0;
+                $y2 = $y;
             } else {
                 $x = self::TILE_COUNT_X - 1;
+                $y2 = $y + 1;
             }
 
-            if (is_null($this->tiles[$y][$x])) {
-                $this->tiles[$y][$x] = $character;
+            if (is_null($this->tiles[$y2][$x])) {
+                $this->tiles[$y2][$x] = $character;
                 break;
             }
         }
