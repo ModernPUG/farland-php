@@ -10,6 +10,7 @@ class UserM extends \FP\Character\Character
     private $y;
     protected $id;
     private $team;
+    private $hp;
     private $current_map;
 
     protected function _action($map_tiles, $pos_x, $pos_y)
@@ -18,13 +19,14 @@ class UserM extends \FP\Character\Character
 
         if (get_class($this) !== 'FP\User\UserM')
         {
-            return new \FP\Action('move', 'up');
+            return new \FP\Action('nil', 'here');
         }
 
         $this->id = $this->info()['id'];
         $this->team = $this->info()['team'];
         $this->x = $this->info()['x'];
         $this->y = $this->info()['y'];
+        $this->hp = $this->info()['hp'];
 
         $direction = $this->findNextEnemy($map_tiles);
         if ($direction)
@@ -37,9 +39,24 @@ class UserM extends \FP\Character\Character
             return new \FP\Action('nil', 'here');
         }
 
+        $enemies = $this->getRemainEnemies($map_tiles);
+
+        foreach($enemies as $enemy)
+        {
+            if ($enemy['hp'] > $this->hp)
+            {
+                continue;
+            }
+
+            $direction = $this->chase($map_tiles, $enemy['x'], $enemy['y']);
+            if ($direction)
+            {
+                return new \FP\Action('move', $direction);
+            }
+        }
+
         $rand = ['up', 'bottom', 'left', 'right'];
-        shuffle($rand);
-        return new \FP\Action('move', $rand[0]);
+        return new \FP\Action('move', $rand[rand(0, 3)]);
     }
 
     private function findNextEnemy($map_tiles)
@@ -94,12 +111,14 @@ class UserM extends \FP\Character\Character
         }
 
         uasort($enemies, function($a, $b) {
-            if ($a['hp'] == $b['hp'])
+            $dist_a = abs($a['x'] - $this->x) + abs($a['y'] - $this->y);
+            $dist_b = abs($b['x'] - $this->x) + abs($b['y'] - $this->y);
+            if ($dist_a == $dist_b)
             {
                 return 0;
             }
 
-            return ($a['hp'] < $b['hp']);
+            return ($dist_a < $dist_b);
         });
 
         return $enemies;
@@ -109,6 +128,30 @@ class UserM extends \FP\Character\Character
     {
         $next_x = ($this->x > $pos_x) ? $this->x - 1 : $this->x + 1;
         $next_y = ($this->y > $pos_y) ? $this->y - 1 : $this->y + 1;
+    }
+
+    private function chase($map_tiles, $x, $y)
+    {
+        $dist_x = abs($this->x - $x);
+        $dist_y = abs($this->y - $y);
+
+        if ($dist_x > $dist_y)
+        {
+            $next = ($this->x > $x) ? $this->x - 1 : $this->x + 1;
+            if (is_null($map_tiles[$this->y][$next]))
+            {
+                return ($this->x > $x) ? 'left' : 'right';
+            }
+        }
+
+        if ($this->y != $y)
+        {
+            $next = ($this->y > $y) ? $this->y - 1 : $this->y + 1;
+            if (is_null($map_tiles[$next][$this->x]))
+            {
+                return ($this->y > $y) ? 'top' : 'bottom';
+            }
+        }
     }
 
     private function maxWidth()
