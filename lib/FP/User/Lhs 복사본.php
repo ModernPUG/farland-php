@@ -3,7 +3,7 @@ namespace FP\User;
 
 use FP\Action;
 
-class User01 extends \FP\Character\Character
+class Lhs extends \FP\Character\Character
 {
     private $actionCount = 0;
     private $me;
@@ -74,7 +74,11 @@ class User01 extends \FP\Character\Character
     function lhsLookAround()
     {
         //오른쪽을 본다
-        $this->me['right'] = $this->lhsMapTiles[$this->me['y']][$this->me['x'] + 1];
+        if($this->me['x'] + 1 > 9){
+            $this->me['right'] = '';
+        } else {
+            $this->me['right'] = $this->lhsMapTiles[$this->me['y']][$this->me['x'] + 1];
+        }
 
         //왼쪽을 본다
         if($this->me['x'] - 1 < 0) {
@@ -89,9 +93,13 @@ class User01 extends \FP\Character\Character
         } else {
             $this->me['top'] = $this->lhsMapTiles[$this->me['y'] - 1][$this->me['x']];
         }
-        
+
         //아래쪽을 본다
-        $this->me['bottom'] = $this->lhsMapTiles[$this->me['y'] + 1][$this->me['x']];
+        if($this->me['y'] + 1 > 7) {
+            $this->me['bottom'] = '';
+        } else {
+            $this->me['bottom'] = $this->lhsMapTiles[$this->me['y'] + 1][$this->me['x']];
+        }
     }
 
     function checkCanGo()
