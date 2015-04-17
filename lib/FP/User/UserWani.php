@@ -80,7 +80,7 @@ class UserWani extends \FP\Character\Character
         $shortestDistance = 100000;
         $shortestUser = $otherUsers[0];
         foreach ($otherUsers as $user) {
-            print_r($this->getDistance($user));
+            //print_r($this->getDistance($user));
             if ($shortestDistance > $this->getDistance($user)) {
                 $shortestDistance = $this->getDistance($user);
                 $shortestUser = $user;
