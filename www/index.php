@@ -41,6 +41,7 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
         $info = $player->info();
         if ($info['hp'] <= 0) {
             unset($player_list[$pi]);
+            continue;
         }
 
         for ($i = 0; $i < 3; $i++) {
