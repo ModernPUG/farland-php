@@ -336,7 +336,7 @@ function gameOver() {
 
     for (var id in unitPlayerList) {
         var unitPlayer = unitPlayerList[id];
-        teamHp[unitPlayer.info.id] += unitPlayer.info.hp;
+        teamHp[unitPlayer.info.team] += unitPlayer.info.hp;
     }
 
     var msg = '';

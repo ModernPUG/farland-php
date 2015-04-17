@@ -4,12 +4,15 @@ namespace FP\User;
 use FP\Action;
 
 class UserWani extends \FP\Character\Character
-{	
-	protected $myTurn = 0;
-	protected $myStartX = 0;
-	protected $myStartY = 0;
+{
+    const MAP_X_MAX = 10;
+    const MAP_Y_MAX = 8;
 
-	protected $myDirection = 'right';
+    protected $myTurn = 0;
+    protected $myStartX = 0;
+    protected $myStartY = 0;
+
+    protected $myDirection = 'right';
 
     /**
      * @param $map
@@ -35,47 +38,90 @@ class UserWani extends \FP\Character\Character
         }
         $this->myTurn++;
 
-        if ($this->getHp() < 10) {
-            $direction = $this->getDirectionNullWay($map, $x, $y);
-            return new Action('move', $direction);
+        if ($this->getHp() < 20 || count($this->findArroundUsers($map, $x, $y)) > 1) {
+            $direction = $this->getDirectionEscape($map, $x, $y);
+            return $this->doActionMove($direction);
         }
 
         $users = $this->findArroundUsers($map, $x, $y);
         if (count($users)) {
-            return new Action('attack', $users[0][0]);
+            return $this->doActionAttack($users[0][0]);
         }
 
         $direction = $this->getDirectionByOtherPositions($map, $x, $y);
         if ($this->getHp() < 40) {
-            $direction = $this->getDirectionNullWay($map, $x, $y);
+            $direction = $this->getDirectionEscape($map, $x, $y);
 //            if ($direction == 'left') $direction = 'right';
 //            if ($direction == 'top') $direction = 'bottom';
         }
 
-        return new Action('move', $direction);
+        return $this->doActionMove($direction);
     }
 
-    protected function getDirectionNullWay($map, $x, $y)
+    protected function getDirectionEscape($map, $x, $y)
     {
-        if (!isset($map[$y][$x-1])) {
-            return 'left';
+        if ($this->lastDirection === 'left') {
+            if ($x != 0 && !isset($map[$y][$x-1])) {
+                return 'left';
+            }
+            if ($y != 0 && !isset($map[$y-1][$x])) {
+                return 'top';
+            }
+            if ($x != static::MAP_X_MAX - 1 && !isset($map[$y][$x+1])) {
+                return 'right';
+            }
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
+                return 'bottom';
+            }
         }
-        if (!isset($map[$y][$x+1])) {
-            return 'right';
+        if ($this->lastDirection === 'top') {
+            if ($y != 0 && !isset($map[$y-1][$x])) {
+                return 'top';
+            }
+            if ($x != static::MAP_X_MAX - 1 && !isset($map[$y][$x+1])) {
+                return 'right';
+            }
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
+                return 'bottom';
+            }
+            if ($x != 0 && !isset($map[$y][$x-1])) {
+                return 'left';
+            }
         }
-        if (!isset($map[$y-1][$x])) {
-            return 'top';
+        if ($this->lastDirection === 'right') {
+            if ($x != static::MAP_X_MAX - 1 && !isset($map[$y][$x+1])) {
+                return 'right';
+            }
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
+                return 'bottom';
+            }
+            if ($x != 0 && !isset($map[$y][$x-1])) {
+                return 'left';
+            }
+            if ($y != 0 && !isset($map[$y-1][$x])) {
+                return 'top';
+            }
         }
-        if (!isset($map[$y+1][$x])) {
-            return 'bottom';
+        if ($this->lastDirection === 'bottom') {
+            if ($y != static::MAP_Y_MAX - 1 && !isset($map[$y+1][$x])) {
+                return 'bottom';
+            }
+            if ($x != 0 && !isset($map[$y][$x-1])) {
+                return 'left';
+            }
+            if ($y != 0 && !isset($map[$y-1][$x])) {
+                return 'top';
+            }
+            if ($x != static::MAP_X_MAX - 1 && !isset($map[$y][$x+1])) {
+                return 'right';
+            }
         }
         return '??';
     }
 
     protected function getDirectionByOtherPositions($map, $myX, $myY)
     {
-        $team = $this->getMyTeam();
-        $otherUsers = $this->getOthersideUserPositons($map, $myX, $myY);
+        $otherUsers = $this->getEnemysPosition($map);
 
         $shortestDistance = 100000;
         $shortestUser = $otherUsers[0];
@@ -106,7 +152,11 @@ class UserWani extends \FP\Character\Character
         return abs($info['x'] - $otherUser['x']) + abs($info['y'] - $otherUser['y']);
     }
 
-    protected function getOthersideUserPositons($map, $myX, $myY)
+    /**
+     * @param $map
+     * @return array
+     */
+    protected function getEnemysPosition($map)
     {
         $users = [];
         $team = $this->getMyTeam();
@@ -120,6 +170,11 @@ class UserWani extends \FP\Character\Character
         return $users;
     }
 
+    /**
+     * @param $x
+     * @param $y
+     * @return string
+     */
     protected function isEdge($x, $y)
     {
         if ($x >= 9) return 'right';
@@ -171,10 +226,10 @@ class UserWani extends \FP\Character\Character
     protected function getOtherTeamByUser($user)
     {
         if (isset($user['team'])) {
-    		return $user['team'];
-    	}
-    	return '?';
-    	return $user['team'];
+            return $user['team'];
+        }
+        return '?';
+        return $user['team'];
     }
 
 
@@ -185,4 +240,21 @@ class UserWani extends \FP\Character\Character
     }
 
 
+
+    private $lastAction = null;
+    private $lastDirection = null;
+
+    protected function doActionMove($direction)
+    {
+        $this->lastAction = 'move';
+        $this->lastDirection = $direction;
+        return new Action('move', $direction);
+    }
+
+    protected function doActionAttack($direction)
+    {
+        $this->lastAction = 'attack';
+        $this->lastDirection = $direction;
+        return new Action('attack', $direction);
+    }
 }
