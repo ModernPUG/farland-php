@@ -20,7 +20,9 @@ class Lhs extends \FP\Character\Character
 
         $result = null;
 
-        $result = $this->lhsAttack();
+        if($this->actionCount%3 != 0) {
+            $result = $this->lhsAttack();
+        }
 
         if($result)
             return $result;

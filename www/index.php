@@ -1,17 +1,23 @@
 <?php
 require_once '../vendor/autoload.php';
 
-error_reporting(E_CORE_ERROR);
-ini_set("display_errors", 1);
-
 $map = new \FP\Map();
 
-$player01 = new \FP\User\User01($map, 1, '아무개1', 1);
-$player02 = new \FP\User\User02($map, 2, '아무개2', 2);
+$player01 = new \FP\User\Lhs($map, 1, 'Lhs', 1);
+$player02 = new \FP\User\UserA2($map, 2, 'A2', 1);
+$player03 = new \FP\User\UserTaeL($map, 3, 'TaeL', 1);
+
+$player04 = new \FP\User\UserM($map, 4, 'M', 2);
+$player05 = new \FP\User\UserWani($map, 5, 'Wani', 2);
+$player06 = new \FP\User\UserBeer($map, 6, 'Beer', 2);
 
 $player_list = [
     $player01,
-    $player02
+    $player02,
+    $player03,
+    $player04,
+    $player05,
+    $player06,
 ];
 
 foreach ($player_list as $player) {
