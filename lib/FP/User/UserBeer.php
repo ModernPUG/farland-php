@@ -60,6 +60,14 @@ class UserBeer extends \FP\Character\Character
     	return ($pos_x >= 0 && $pos_x < 10 && $pos_y >= 0 && $pos_y < 8 );
     }
 
+    private function isEnemyStrongerThanMe($map_tiles, $pos_x, $pos_y) {
+        $info = $this->info();
+        if ( $map_tiles[$y][$x]['hp'] >= $info['hp'] ) {
+            return true;
+        }
+        return false;
+    }
+
     /**
      * 적 찾기 (때릴려고 다가갈 가까운애)
      */
@@ -67,34 +75,32 @@ class UserBeer extends \FP\Character\Character
     	$enemyArray = [];
     	for ( $y = 0 ; $y < 8 ; $y++ ) {
     		for ( $x = 0 ; $x < 10 ; $x++ ) {
-    			if ( $map_tiles[$y][$x]['team'] != $this->getMyTeamNum() )
-    				array_push($enemyArray, ['x' => $x, 'y' => $y, 'value' => $x + $y]);
+    			if ( $this->isEnemy($map_tiles, $y, $x) )
+                    if ( $this->isEnemyStrongerThanMe($map_tiles, $y, $x) ) {
+                        continue;
+                    }
+    				array_push($enemyArray, ['x' => $x, 'y' => $y, 'value' => abs($x - $pos_x) + abs($y - $pos_y)]);
     		}
     	}
 
-    	$enemyArray = $this->aasort($enemyArray, "value");
+    	$this->aasort($enemyArray, "value");
     	$target_x = $enemyArray[0]['x'];
     	$target_y = $enemyArray[0]['y'];
     	// echo "------------{<br/>";
-    	// echo nl2br(print_r($enemyArray[0], true));
+    	// echo nl2br(print_r($enemyArray, true))."<br/>";
     	// echo "}------------<br/>";
 
     	$direction = "left";
-    	if ( abs($pos_x - $target_x) > abs($pos_y - $target_y) ) {
-    		// y로 움직여
-    		// echo "test: ($pos_x , $target_x)";
-	    	if ( $pos_x < $target_x ) {
-	    		$direction = 'right';
-	    	} else {
-	    		$direction = 'left';
-	    	}
-    	} else {
-    		if ( $pos_y < $target_y ) {
-    			$direction = 'bottom';
-    		} else {
-    			$direction = 'top';
-    		}
-    	}
+        if ( $target_x > $pos_x ) {
+            $direction = "right";
+        } else if ( $target_x < $pos_x ) {
+            $direction = "left";
+        } else if ( $target_y > $pos_y ) { 
+            $direction = "bottom";
+        } else if ( $target_y < $pos_y ) { 
+            $direction = "top";
+        }
+
     	return $direction;
     }
 
@@ -110,6 +116,5 @@ class UserBeer extends \FP\Character\Character
 	        $ret[$ii]=$array[$ii];
 	    }
 	    $array=$ret;
-	    return $array;
 		}
 }
