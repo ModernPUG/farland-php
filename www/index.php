@@ -4,15 +4,18 @@ require_once '../vendor/autoload.php';
 error_reporting(E_CORE_ERROR);
 ini_set("display_errors", 1);
 
+$auth = new \stdClass();
 $map = new \FP\Map();
 
-$player01 = new \FP\User\UserA2($map, 1, 'A2', 1);
-$player02 = new \FP\User\UserM($map, 2, 'M', 1);
-$player03 = new \FP\User\UserBeer($map, 3, 'Beer', 1);
+$player01 = new \FP\User\UserWani($auth, $map, 1, 'Wani', 1);
+$player02 = new \FP\User\UserA2($auth, $map, 2, 'A2', 1);
+$player03 = new \FP\User\UserBeer($auth, $map, 3, '!Beer', 1);
+$player04 = new \FP\User\UserTaeL($auth, $map, 4, 'TaeL', 1);
 
-$player04 = new \FP\User\UserWani($map, 4, 'Wani', 2);
-$player05 = new \FP\User\UserTaeL($map, 5, 'TaeL', 2);
-$player06 = new \FP\User\Lhs($map, 6, 'Lhs', 2);
+$player05 = new \FP\User\UserTaeL($auth, $map, 5, '!TaeL', 2);
+$player06 = new \FP\User\UserM($auth, $map, 6, 'M', 2);
+$player07 = new \FP\User\UserBeer($auth, $map, 7, 'Beer', 2);
+$player08 = new \FP\User\Lhs($auth, $map, 8, 'Lhs', 2);
 
 $player_list = [
     $player01,
@@ -21,6 +24,8 @@ $player_list = [
     $player04,
     $player05,
     $player06,
+    $player07,
+    $player08,
 ];
 
 foreach ($player_list as $player) {
@@ -67,7 +72,7 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
                         $player->setDirection($action->direction);
                         $log_list[] = $player->info();
 
-                        $obj->takeDamage(rand(3, 5));
+                        $obj->takeDamage($auth);
                         $info = $obj->info();
                         $log_list[] = $info;
 
@@ -75,6 +80,10 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
                             $map->removeCharacter($obj);
                         }
                     }
+                    break;
+
+                case 'recovery':
+                    $player->recovery($auth);
                     break;
             }
         }
@@ -90,13 +99,13 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
 <script src="http://ajax.googleapis.com/ajax/libs/jquery/2.1.3/jquery.min.js"></script>
 <script src="https://maxcdn.bootstrapcdn.com/bootstrap/3.3.4/js/bootstrap.min.js"></script>
 <script src="./pixi.dev.js"></script>
-<title>파랜드 PHP - Ver 0.1</title>
+<title>파랜드 PHP - Ver 0.1.1</title>
 </head>
 <body>
 
 <div>
     <div id="game-stage" style="width: 320px; height: 256px; float: left; background: #999;"></div>
-    <textarea id="txt-info" style="width: 300px; height: 256px; float: left; border: 2px solid #000; background: #000; color: #fff;"></textarea>
+    <textarea id="txt-info" style="width: 200px; height: 256px; float: left; border: 2px solid #000; background: #000; color: #0f0;"></textarea>
 </div>
 
 <script>
@@ -323,7 +332,9 @@ function showInfo() {
 
     for (var id in unitPlayerList) {
         var unitPlayer = unitPlayerList[id];
-        txt += unitPlayer.info.team + '팀\t|\t' + unitPlayer.info.name + '\t|\tHP:' + unitPlayer.info.hp + '\n';
+        var space = 8 - unitPlayer.info.name.length;
+        var name = unitPlayer.info.name + Array(space).join(' ');
+        txt += unitPlayer.info.team + '팀  |  ' + name + '\t|  HP: ' + unitPlayer.info.hp + '\n';
     }
 
     $('#txt-info').val(txt);
@@ -418,7 +429,6 @@ $(function () {
     onFrame = logPlay.frame;
 
     drawMap();
-    // drawGuideLine();
 
     audioBgm.play();
 });

@@ -9,23 +9,24 @@ abstract class Character
     private $name;
     private $team;
     private $hp = 100;
+    private $auth = null;
     private $map = null;
     private $direction = 'bottom';
 
-    final public function __construct(\FP\Map $map, $id, $name, $team)
+    final public function __construct($auth, \FP\Map $map, $id, $name, $team)
     {
         $this->id = $id;
         $this->map = $map;
+        $this->auth = $auth;
         $this->name = $name;
         $this->team = $team;
     }
 
     final public function info()
     {
-    	$position = $this->position();
-    	$x = isset($position[0]) ? $position[0] : 0;
-    	$y = isset($position[1]) ? $position[1] : 0;
-//        list($x, $y) = $this->position();
+        $position = $this->position();
+        $x = isset($position[0]) ? $position[0] : 0;
+        $y = isset($position[1]) ? $position[1] : 0;
 
         return [
             'id' => $this->id,
@@ -50,19 +51,38 @@ abstract class Character
 
     final public function action()
     {
-//        list($pos_x, $pos_y) = $this->map->positionOfCharacter($this);
-    	$position = $this->map->positionOfCharacter($this);
-    	$pos_x = isset($position[0]) ? $position[0] : 0;
-    	$pos_y = isset($position[1]) ? $position[1] : 0;
+        $position = $this->map->positionOfCharacter($this);
+        $pos_x = isset($position[0]) ? $position[0] : 0;
+        $pos_y = isset($position[1]) ? $position[1] : 0;
 
         return $this->_action($this->map->tiles(), $pos_x, $pos_y);
     }
 
-    final public function takeDamage($damage)
+    final public function takeDamage($auth)
     {
-        $this->hp -= $damage;
+        if ($this->auth !== $auth) {
+            return;
+        }
+
+        $this->hp -= rand(3, 5);
         if ($this->hp < 0) {
             $this->hp = 0;
+        }
+    }
+
+    final public function recovery($auth)
+    {
+        if ($this->auth !== $auth) {
+            return;
+        }
+
+        if ($this->hp >= 50) {
+            return;
+        }
+
+        $this->hp += rand(1, 2);
+        if ($this->hp > 50) {
+            $this->hp = 50;
         }
     }
 

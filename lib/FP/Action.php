@@ -7,7 +7,7 @@ class Action
     public $direction;
 
     /**
-     * @param string $type {move|attack}
+     * @param string $type {move|attack|recovery}
      * @param string $direction {left|right|top|bottom}
      */
     public function __construct($type, $direction)

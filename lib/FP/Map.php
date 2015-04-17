@@ -41,7 +41,7 @@ class Map
 
         $info = $character->info();
 
-        for ($y = 1; $y < self::TILE_COUNT_Y; $y = $y + 2) {
+        for ($y = 0; $y < self::TILE_COUNT_Y; $y = $y + 2) {
             if ($info['team'] == 1) {
                 $x = 0;
                 $y2 = $y;
