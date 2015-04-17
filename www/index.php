@@ -3,9 +3,9 @@ require_once '../vendor/autoload.php';
 
 $map = new \FP\Map();
 
-$player01 = new \FP\User\User01($map, 1, '아무개1', 1);
+$player01 = new \FP\User\UserWani($map, 1, '아무개1', 1);
 $player02 = new \FP\User\User02($map, 2, '아무개2', 2);
-$player03 = new \FP\User\User01($map, 3, '아무개3', 1);
+$player03 = new \FP\User\User02($map, 3, '아무개3', 1);
 $player04 = new \FP\User\User02($map, 4, '아무개4', 2);
 
 $player_list = [
@@ -38,6 +38,11 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
     shuffle($player_list);
 
     foreach ($player_list as $pi => $player) {
+        $info = $player->info();
+        if ($info['hp'] <= 0) {
+            unset($player_list[$pi]);
+        }
+
         for ($i = 0; $i < 3; $i++) {
             $action = $player->action();
 
@@ -58,8 +63,7 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
                         $log_list[] = $info;
 
                         if (!$info['hp']) {
-                            $map->removeCharacter($player);
-                            unset($player_list[$pi]);
+                            $map->removeCharacter($obj);
                         }
                     }
                     break;
