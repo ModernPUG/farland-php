@@ -3,8 +3,14 @@ namespace FP\User;
 
 class UserBeer extends \FP\Character\Character
 {
+    private $turnCount = 0;
+    private $currentTurn = 0;
+
     protected function _action($map_tiles, $pos_x, $pos_y)
     {
+        $this->currentTurn = $this->turnCount % 3;
+        $this->turnCount++;
+
     	//phpinfo();
     	// 주변에 타팀이 붙어있는지 확인
     	$nearEnemyDirection = $this->getNearEnemyDirection($map_tiles, $pos_x, $pos_y);
@@ -43,16 +49,25 @@ class UserBeer extends \FP\Character\Character
      * 적 찾기 (붙어있어서 때릴 애)
      */
     private function getNearEnemyDirection($map_tiles, $pos_x, $pos_y) {
-    	if ( $this->validArrayPosition($pos_x, $pos_y - 1) && $this->isEnemy($map_tiles, $pos_y - 1, $pos_x) ) {
-    		return 'top';
+    	$direction = 'top';
+        $numOfNearEnemy = 0;
+        if ( $this->validArrayPosition($pos_x, $pos_y - 1) && $this->isEnemy($map_tiles, $pos_y - 1, $pos_x) ) {
+    		$direction = 'top';
+            $numOfNearEnemy++;
     	} else if ( $this->validArrayPosition($pos_x - 1, $pos_y) && $this->isEnemy($map_tiles, $pos_y, $pos_x - 1)) {
-    		return 'left';
+            $direction = 'left';
+            $numOfNearEnemy++;
     	} else if ( $this->validArrayPosition($pos_x, $pos_y + 1) && $this->isEnemy($map_tiles, $pos_y + 1, $pos_x)) {
-    		return 'bottom';
+            $direction = 'bottom';
+            $numOfNearEnemy++;
     	} else if ( $this->validArrayPosition($pos_x + 1, $pos_y) && $this->isEnemy($map_tiles, $pos_y, $pos_x + 1))  {
-    		return 'right';
-    	}
-    	return null;
+            $direction = 'right';
+            $numOfNearEnemy++;
+    	} else {
+            $direction = null;
+        }
+
+    	return $direction;
     }
 
     private function validArrayPosition($pos_x, $pos_y)
@@ -75,11 +90,12 @@ class UserBeer extends \FP\Character\Character
     	$enemyArray = [];
     	for ( $y = 0 ; $y < 8 ; $y++ ) {
     		for ( $x = 0 ; $x < 10 ; $x++ ) {
-    			if ( $this->isEnemy($map_tiles, $y, $x) )
+    			if ( $this->isEnemy($map_tiles, $y, $x) ) {
                     if ( $this->isEnemyStrongerThanMe($map_tiles, $y, $x) ) {
                         continue;
                     }
     				array_push($enemyArray, ['x' => $x, 'y' => $y, 'value' => abs($x - $pos_x) + abs($y - $pos_y)]);
+                }
     		}
     	}
 
