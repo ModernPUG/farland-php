@@ -9,13 +9,11 @@ $map = new \FP\Map();
 
 $player01 = new \FP\User\UserWani($auth, $map, 1, 'Wani', 1);
 $player02 = new \FP\User\UserA2($auth, $map, 2, 'A2', 1);
-$player03 = new \FP\User\UserBeer($auth, $map, 3, '!Beer', 1);
-$player04 = new \FP\User\UserTaeL($auth, $map, 4, 'TaeL', 1);
+$player03 = new \FP\User\UserTaeL($auth, $map, 3, 'TaeL', 1);
 
-$player05 = new \FP\User\UserTaeL($auth, $map, 5, '!TaeL', 2);
-$player06 = new \FP\User\UserM($auth, $map, 6, 'M', 2);
-$player07 = new \FP\User\UserBeer($auth, $map, 7, 'Beer', 2);
-$player08 = new \FP\User\Lhs($auth, $map, 8, 'Lhs', 2);
+$player04 = new \FP\User\UserM($auth, $map, 4, 'M', 2);
+$player05 = new \FP\User\UserBeer($auth, $map, 5, 'Beer', 2);
+$player06 = new \FP\User\Lhs($auth, $map, 6, 'Lhs', 2);
 
 $player_list = [
     $player01,
@@ -24,8 +22,8 @@ $player_list = [
     $player04,
     $player05,
     $player06,
-    $player07,
-    $player08,
+    // $player07,
+    // $player08,
 ];
 
 foreach ($player_list as $player) {
