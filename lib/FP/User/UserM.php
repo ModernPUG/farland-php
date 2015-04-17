@@ -41,6 +41,16 @@ class UserM extends \FP\Character\Character
 
         $enemies = $this->getRemainEnemies($map_tiles);
 
+        // $cand_enemy = $this->availableGroupAttackEnemy($map_tiles, $enemies);
+        // if ($cand_enemy)
+        // {
+        //     $direction = $this->chase($map_tiles, $enemy['x'], $enemy['y']);
+        //     if ($direction)
+        //     {
+        //         return new \FP\Action('move', $direction);
+        //     }
+        // }
+
         foreach($enemies as $enemy)
         {
             if ($enemy['hp'] > $this->hp)
@@ -49,6 +59,17 @@ class UserM extends \FP\Character\Character
             }
 
             $direction = $this->chase($map_tiles, $enemy['x'], $enemy['y']);
+            if ($direction)
+            {
+                return new \FP\Action('move', $direction);
+            }
+        }
+
+        $team = $this->getRemainTeam($map_titles);
+
+        foreach($team as $member)
+        {
+            $direction = $this->chase($map_tiles, $member['x'], $member['y']);
             if ($direction)
             {
                 return new \FP\Action('move', $direction);
@@ -89,9 +110,49 @@ class UserM extends \FP\Character\Character
         return $enemy;
     }
 
+    private function findNextTeam($map_tiles, $x, $y)
+    {
+        $cand = [];
+        $next = @$map_tiles[$y-1][$x];
+        if (!$this->isEnemy($next))
+        {
+            $cand['top'] = $next['hp'];
+        }
+        $next = @$map_tiles[$y+1][$x];
+        if (!$this->isEnemy($next))
+        {
+            $cand['bottom'] = $next['hp'];
+        }
+        $next = @$map_tiles[$y][$x-1];
+        if (!$this->isEnemy($next))
+        {
+            $cand['left'] = $next['hp'];
+        }
+        $next = @$map_tiles[$y][$x+1];
+        if (!$this->isEnemy($next))
+        {
+            $cand['right'] = $next['hp'];
+        }
+
+        arsort($cand);
+
+        return !empty($cand);
+    }
+
     private function isEnemy($info)
     {
         return ($info && $info['team'] !== $this->team);
+    }
+
+    private function availableGroupAttackEnemy($map_tiles, $enemies)
+    {
+        foreach($enemies as $enemy)
+        {
+            if ($this->findNextTeam($map_tiles, $enemy['x'], $enemy['y']))
+            {
+                return $enemy;
+            }
+        }
     }
 
     private function getRemainEnemies($map_tiles)
@@ -124,10 +185,34 @@ class UserM extends \FP\Character\Character
         return $enemies;
     }
 
-    private function isReachable($pos_x, $pos_y)
+    private function getRemainTeam($map_tiles)
     {
-        $next_x = ($this->x > $pos_x) ? $this->x - 1 : $this->x + 1;
-        $next_y = ($this->y > $pos_y) ? $this->y - 1 : $this->y + 1;
+        $team = [];
+
+        for ($i=0; $i < $this->maxWidth(); $i++)
+        {
+            for ($j=0; $j < $this->maxHeight(); $j++)
+            {
+                $next = $map_tiles[$j][$i];
+                if ($next && $next['team'] === $this->team)
+                {
+                    $team[] = $next;
+                }
+            }
+        }
+
+        uasort($team, function($a, $b) {
+            $dist_a = abs($a['x'] - $this->x) + abs($a['y'] - $this->y);
+            $dist_b = abs($b['x'] - $this->x) + abs($b['y'] - $this->y);
+            if ($dist_a == $dist_b)
+            {
+                return 0;
+            }
+
+            return ($dist_a < $dist_b);
+        });
+
+        return $team;
     }
 
     private function chase($map_tiles, $x, $y)
