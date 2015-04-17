@@ -45,7 +45,7 @@ class UserTaeL extends \FP\Character\Character
     protected function getDirection($map_tiles, $pos_x, $pos_y)
     {
         if ($this->info()['hp'] < 49) {
-            $this->takeDamage(rand(-7, -1));
+            $this->takeDamage(rand(-3, -1));
         }
         $left = @$map_tiles[$pos_y][$pos_x - 1];
         $right = @$map_tiles[$pos_y][$pos_x + 1];
