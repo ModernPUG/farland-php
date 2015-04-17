@@ -171,7 +171,10 @@ class Map
 
     public function objectFromDirectionOfCharacter(\FP\Character\Character $character, $direction)
     {
-        list($old_x, $old_y) = $this->positionOfCharacter($character);
+        //list($old_x, $old_y) = $this->positionOfCharacter($character);
+    	$position = $this->positionOfCharacter($character);
+    	$old_x = isset($position[0]) ? $position[0] : 0;
+    	$old_y = isset($position[1]) ? $position[1] : 0;
 
         $pos = $this->positionFromDirection($old_x, $old_y, $direction);
         if (!$pos) {

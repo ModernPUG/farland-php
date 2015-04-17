@@ -22,7 +22,10 @@ abstract class Character
 
     final public function info()
     {
-        list($x, $y) = $this->position();
+    	$position = $this->position();
+    	$x = isset($position[0]) ? $position[0] : 0;
+    	$y = isset($position[1]) ? $position[1] : 0;
+//        list($x, $y) = $this->position();
 
         return [
             'id' => $this->id,
@@ -47,7 +50,11 @@ abstract class Character
 
     final public function action()
     {
-        list($pos_x, $pos_y) = $this->map->positionOfCharacter($this);
+//        list($pos_x, $pos_y) = $this->map->positionOfCharacter($this);
+    	$position = $this->map->positionOfCharacter($this);
+    	$pos_x = isset($position[0]) ? $position[0] : 0;
+    	$pos_y = isset($position[1]) ? $position[1] : 0;
+
         return $this->_action($this->map->tiles(), $pos_x, $pos_y);
     }
 
