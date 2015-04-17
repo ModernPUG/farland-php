@@ -1,6 +1,9 @@
 <?php
 require_once '../vendor/autoload.php';
 
+error_reporting(E_CORE_ERROR);
+ini_set("display_errors", 1);
+
 $map = new \FP\Map();
 
 $player01 = new \FP\User\Lhs($map, 1, 'Lhs', 1);
@@ -64,7 +67,7 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
                         $player->setDirection($action->direction);
                         $log_list[] = $player->info();
 
-                        $obj->takeDamage(rand(7, 10));
+                        $obj->takeDamage(rand(3, 5));
                         $info = $obj->info();
                         $log_list[] = $info;
 
