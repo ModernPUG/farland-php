@@ -37,6 +37,12 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
     shuffle($player_list);
 
     foreach ($player_list as $pi => $player) {
+        $info = $player->info();
+        if ($info['hp'] <= 0) {
+            unset($player_list[$pi]);
+            continue;
+        }
+
         for ($i = 0; $i < 3; $i++) {
             $action = $player->action();
 
@@ -57,8 +63,7 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
                         $log_list[] = $info;
 
                         if (!$info['hp']) {
-                            $map->removeCharacter($player);
-                            unset($player_list[$pi]);
+                            $map->removeCharacter($obj);
                         }
                     }
                     break;
@@ -66,10 +71,6 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
         }
     }
 }
-
-//echo "<pre>";
-//print_r($log_list);
-//echo "</pre>";
 ?>
 <!DOCTYPE html>
 <html>
@@ -407,7 +408,7 @@ $(function () {
     drawMap();
     // drawGuideLine();
 
-    //audioBgm.play();
+    audioBgm.play();
 });
 
 

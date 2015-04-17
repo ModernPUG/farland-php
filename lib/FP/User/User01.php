@@ -77,11 +77,19 @@ class User01 extends \FP\Character\Character
         $this->me['right'] = $this->lhsMapTiles[$this->me['y']][$this->me['x'] + 1];
 
         //왼쪽을 본다
-        $this->me['left'] = $this->lhsMapTiles[$this->me['y']][$this->me['x'] - 1];
+        if($this->me['x'] - 1 < 0) {
+            $this->me['left'] = '';
+        } else {
+            $this->me['left'] = $this->lhsMapTiles[$this->me['y']][$this->me['x'] - 1];
+        }
 
         //위쪽을 본다
-        $this->me['top'] = $this->lhsMapTiles[$this->me['y'] - 1][$this->me['x']];
-
+        if($this->me['y'] - 1 < 0) {
+            $this->me['top'] = '';
+        } else {
+            $this->me['top'] = $this->lhsMapTiles[$this->me['y'] - 1][$this->me['x']];
+        }
+        
         //아래쪽을 본다
         $this->me['bottom'] = $this->lhsMapTiles[$this->me['y'] + 1][$this->me['x']];
     }
