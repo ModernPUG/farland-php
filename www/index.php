@@ -1,18 +1,17 @@
 <?php
 require_once '../vendor/autoload.php';
 
+error_reporting(E_CORE_ERROR);
+ini_set("display_errors", 1);
+
 $map = new \FP\Map();
 
 $player01 = new \FP\User\User01($map, 1, '아무개1', 1);
 $player02 = new \FP\User\User02($map, 2, '아무개2', 2);
-$player03 = new \FP\User\User01($map, 3, '아무개3', 1);
-$player04 = new \FP\User\User02($map, 4, '아무개4', 2);
 
 $player_list = [
     $player01,
-    $player02,
-    $player03,
-    $player04,
+    $player02
 ];
 
 foreach ($player_list as $player) {
@@ -67,6 +66,10 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
         }
     }
 }
+
+//echo "<pre>";
+//print_r($log_list);
+//echo "</pre>";
 ?>
 <!DOCTYPE html>
 <html>
@@ -404,7 +407,7 @@ $(function () {
     drawMap();
     // drawGuideLine();
 
-    audioBgm.play();
+    //audioBgm.play();
 });
 
 
