@@ -35,12 +35,59 @@ class UserA2 extends \FP\Character\Character
         foreach ($xy_list as list($x, $y)) {
             $target = $map_tiles[$y][$x];
 
-            if ($target) {
+            if (!$target) {
+                continue;
+            }
+
+            if ($target['team'] != $info['team']) {
                 ++$count;
             }
         }
 
         return $count;
+    }
+
+    private function nearWeakEnemy($map_tiles)
+    {
+        $info = $this->info();
+
+        $count = 0;
+
+        $xy_list = [
+            [$info['x'] - 1, $info['y']],
+            [$info['x'] + 1, $info['y']],
+            [$info['x'], $info['y'] - 1],
+            [$info['x'], $info['y'] + 1],
+        ];
+
+        $min_hp = 101;
+        $target_x = -1;
+        $target_y = -1;
+
+        foreach ($xy_list as list($x, $y)) {
+            $target = $map_tiles[$y][$x];
+
+            if (!$target) {
+                continue;
+            }
+
+            if ($target['team'] != $info['team']) {
+                if ($target['hp'] < $min_hp) {
+                    $min_hp = $target['hp'];
+                    $target_x = $x;
+                    $target_y = $y;
+                }
+            }
+        }
+
+        if ($target_x < 0) {
+            return [];
+        } else {
+            return [
+                $target_x,
+                $target_y,
+            ];
+        }
     }
 
     private function findTeam($map_tiles)
@@ -66,27 +113,6 @@ class UserA2 extends \FP\Character\Character
     private function findEnemy($map_tiles)
     {
         $info = $this->info();
-
-        $xy_list = [
-            [$info['x'] - 1, $info['y']],
-            [$info['x'] + 1, $info['y']],
-            [$info['x'], $info['y'] - 1],
-            [$info['x'], $info['y'] + 1],
-        ];
-
-        foreach ($xy_list as list($x, $y)) {
-            $target = $map_tiles[$y][$x];
-            if (!$target) {
-                continue;
-            }
-
-            if ($target['team'] != $info['team']) {
-                return [
-                    $x,
-                    $y,
-                ];
-            }
-        }
 
         $min_hp = 101;
         $target_x = -1;
@@ -177,30 +203,52 @@ class UserA2 extends \FP\Character\Character
             }
         }
 
-        // 적을 찾기
+        // 바로 옆 약한 적 찾기
+        $target = $this->nearWeakEnemy($map_tiles);
+        if ($target) {
+            if ($this->turn_count % 3 == 0) {
+                if ($info['hp'] < $target['hp']) {
+                    // 팀에게 도망
+                    $target = $this->findTeam($map_tiles);
+                    if ($target) {
+                        list($target_x, $target_y) = $target;
+                        $move_direction = $this->directionToTarget($map_tiles, $target_x, $target_y);
+
+                        if ($move_direction) {
+                            return new \FP\Action('move', $move_direction);
+                        }
+                    }
+                    //
+                }
+            }
+
+            list($target_x, $target_y) = $target;
+
+            $remainder_x = $info['x'] - $target_x;
+            $remainder_y = $info['y'] - $target_y;
+
+            if ($remainder_x == 0 && abs($remainder_y) == 1) {
+                if ($remainder_y == -1) {
+                    return new \FP\Action('attack', 'bottom');
+                } else {
+                    return new \FP\Action('attack', 'top');
+                }
+            }
+
+            if ($remainder_y == 0 && abs($remainder_x) == 1) {
+                if ($remainder_x == -1) {
+                    return new \FP\Action('attack', 'right');
+                } else {
+                    return new \FP\Action('attack', 'left');
+                }
+            }
+        }
+
+        // 어딘가의 약한 적을 찾기
         list($target_x, $target_y) = $this->findEnemy($map_tiles);
 
-        $remainder_x = $info['x'] - $target_x;
-        $remainder_y = $info['y'] - $target_y;
+        $direction = $this->directionToTarget($map_tiles, $target_x, $target_y);
 
-        if ($remainder_x == 0 && abs($remainder_y) == 1) {
-            if ($remainder_y == -1) {
-                return new \FP\Action('attack', 'bottom');
-            } else {
-                return new \FP\Action('attack', 'top');
-            }
-        }
-
-        if ($remainder_y == 0 && abs($remainder_x) == 1) {
-            if ($remainder_x == -1) {
-                return new \FP\Action('attack', 'right');
-            } else {
-                return new \FP\Action('attack', 'left');
-            }
-        }
-
-        $move_direction = $this->directionToTarget($map_tiles, $target_x, $target_y);
-
-        return new \FP\Action('move', $move_direction);
+        return new \FP\Action('move', $direction);
     }
 }

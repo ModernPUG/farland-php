@@ -95,7 +95,7 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
 <body>
 
 <div>
-    <div id="game-stage" style="float: left;"></div>
+    <div id="game-stage" style="width: 320px; height: 256px; float: left; background: #999;"></div>
     <textarea id="txt-info" style="width: 300px; height: 256px; float: left; border: 2px solid #000; background: #000; color: #fff;"></textarea>
 </div>
 
@@ -245,8 +245,9 @@ var UnitPlayer = function (info) {
                 break;
         }
 
+        var hpBarColor = info.team == 1 ? '0x00FF00' : '0xFF0000';
         hpBar.clear();
-        hpBar.lineStyle(2, 0x00FF00, 1);
+        hpBar.lineStyle(2, hpBarColor, 1);
         hpBar.moveTo(0, 1);
         hpBar.lineTo(tileWidth * info.hp / 100, 1);
 
