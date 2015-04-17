@@ -8,24 +8,37 @@ class Lhs extends \FP\Character\Character
     private $actionCount = 0;
     private $me;
     private $lhsMapTiles;
+    private $weakEnemy;
 
     protected function _action($map_tiles, $pos_x, $pos_y)
     {
         $this->actionCount++;
         $this->lhsMapTiles = $map_tiles;
+        $this->weakEnemy = null;
 
         $this->me = $this->info();
+
+//        if($this->actionCount == 10){
+//            echo "<pre>";
+//        print_r($this->me);
+//            print_r($this->lhsMapTiles);
+//            echo "</pre>";
+//            exit;
+//        }
 
         $this->lhsLookAround();
 
         $result = null;
 
-        if($this->actionCount%3 != 0) {
-            $result = $this->lhsAttack();
-        }
+        $result = $this->lhsAttack();
 
         if($result)
             return $result;
+
+        $this->findWeakEnemy();
+
+        //error_log('weak x:'.$this->weakEnemy['x']. ', weak y: '. $this->weakEnemy['y']);
+        //$this->moveToWeakEnemy();
 
         if(!$this->checkCanGo()){
             while(!$this->checkCanGo()){
@@ -34,6 +47,35 @@ class Lhs extends \FP\Character\Character
         }
 
         return $this->lhsMove();
+    }
+
+    function moveToWeakEnemy()
+    {
+        $this->chooseDirection();
+    }
+
+    function chooseDirection()
+    {
+        $distanceX = $this->me['x'] - $this->weakEnemy['x'];
+    }
+
+    function findWeakEnemy()
+    {
+        for($i=0; $i < 8; $i++) {
+            for($j=0; $j < 10; $j++) {
+                if($this->lhsMapTiles[$j][$i]){
+                    if($this->me['team'] != $this->lhsMapTiles[$j][$i]['team']) {
+                        if(!$this->weakEnemy){
+                            $this->weakEnemy = $this->lhsMapTiles[$j][$i];
+                        } else {
+                            if($this->weakEnemy['hp'] > $this->lhsMapTiles[$j][$i]['hp']) {
+                                $this->weakEnemy = $this->lhsMapTiles[$j][$i];
+                            }
+                        }
+                    }
+                }
+            }
+        }
     }
 
     function lhsAttack()
