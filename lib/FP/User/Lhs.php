@@ -9,6 +9,7 @@ class Lhs extends \FP\Character\Character
     private $me;
     private $lhsMapTiles;
     private $weakEnemy;
+    private $moveAble;
 
     protected function _action($map_tiles, $pos_x, $pos_y)
     {
@@ -28,6 +29,12 @@ class Lhs extends \FP\Character\Character
 
         $this->lhsLookAround();
 
+        $this->findWeakEnemy();
+
+//        if($this->checkWeakEnemyIsNear()){
+//
+//        }
+
         $result = null;
 
         $result = $this->lhsAttack();
@@ -35,116 +42,98 @@ class Lhs extends \FP\Character\Character
         if($result)
             return $result;
 
-        $this->findWeakEnemy();
-
         //error_log('weak x:'.$this->weakEnemy['x']. ', weak y: '. $this->weakEnemy['y']);
-        $this->moveToWeakEnemy();
+        $this->chooseDirection();
+        $this->me['direction'] = $this->newDirection;
 
         return $this->lhsMove();
     }
 
-    function moveToWeakEnemy()
+    function checkWeakEnemyIsNear()
     {
-        $this->chooseDirection();
+        if($this->weakEnemy['x'] == $this->me['x'] + 1 && $this->weakEnemy['y'] == $this->me['y'])
+            return true;
+
+        if($this->weakEnemy['x'] == $this->me['x'] - 1 && $this->weakEnemy['y'] == $this->me['y'])
+            return true;
+
+        if($this->weakEnemy['x'] == $this->me['x']  && $this->weakEnemy['y'] == $this->me['y'] + 1)
+            return true;
+
+        if($this->weakEnemy['x'] == $this->me['x'] && $this->weakEnemy['y'] == $this->me['y'] - 1)
+            return true;
+    }
+
+    function chooseDirection2()
+    {
+
+    }
+
+    function checkMoveableDirection()
+    {
+        if($this->lhsMapTiles[$this->me['y'] + 1][$this->me['x']]) $this->moveAble[] = 'top';
+        if($this->lhsMapTiles[$this->me['y'] - 1][$this->me['x']]) $this->moveAble[] = 'bottom';
+        if($this->lhsMapTiles[$this->me['y']][$this->me['x'] + 1]) $this->moveAble[] = 'right';
+        if($this->lhsMapTiles[$this->me['y']][$this->me['x'] - 1]) $this->moveAble[] = 'left';
     }
 
     function chooseDirection()
     {
-        $result = '';
+        $this->newDirection = '';
 
         $distanceX = abs($this->me['x'] - $this->weakEnemy['x']);
         $distanceY = abs($this->me['y'] - $this->weakEnemy['y']);
 
-        //
         if($distanceX > $distanceY) {
             if($this->me['y'] > $this->weakEnemy['y']) {
                 //try move to top
                 if($this->me['top'] || $this->me['y'] > 0){
-                    $this->me['direction'] == 'top';
-                    exit;
+                    $this->newDirection = 'top';
                 }
             } else {
                 //try move to bottom
                 if($this->me['bottom'] || $this->me['y'] < 7){
-                    $this->me['direction'] == 'bottom';
-                    exit;
+                    $this->newDirection = 'bottom';
                 }
             }
 
             if($this->me['x'] > $this->weakEnemy['x']) {
                 //try move to left
                 if($this->me['left'] || $this->me['x'] > 0){
-                    $this->me['direction'] == 'left';
-                    exit;
+                    $this->newDirection = 'left';
                 }
             } else {
                 //try move to right
                 if($this->me['right'] || $this->me['x'] < 9){
-                    $this->me['direction'] == 'right';
-                    exit;
+                    $this->newDirection = 'right';
                 }
             }
         } else {
             if($this->me['x'] > $this->weakEnemy['x']) {
                 //try move to left
                 if($this->me['left'] || $this->me['x'] > 0){
-                    $this->me['direction'] == 'left';
-                    exit;
+                    $this->newDirection = 'left';
                 }
             } else {
                 //try move to right
                 if($this->me['right'] || $this->me['x'] < 9){
-                    $this->me['direction'] == 'right';
-                    exit;
+                    $this->newDirection = 'right';
                 }
             }
 
             if($this->me['y'] > $this->weakEnemy['y']) {
                 //try move to top
                 if($this->me['top'] || $this->me['y'] > 0){
-                    $this->me['direction'] == 'top';
-                    exit;
+                    $this->newDirection = 'top';
                 }
             } else {
                 //try move to bottom
                 if($this->me['bottom'] || $this->me['y'] < 7){
-                    $this->me['direction'] == 'bottom';
-                    exit;
+                    $this->newDirection = 'bottom';
                 }
             }
         }
 
-        if(!$result){
-            if($distanceX > $distanceY) {
-                if($this->me['x'] > $this->weakEnemy['x']) {
-                    //try move to left
-                    if($this->me['left'] || $this->me['x'] > 0){
-                        $this->me['direction'] == 'left';
-                        exit;
-                    }
-                } else {
-                    //try move to right
-                    if($this->me['right'] || $this->me['x'] < 9){
-                        $this->me['direction'] == 'right';
-                        exit;
-                    }
-                }
-            } else {
-                if($this->me['y'] > $this->weakEnemy['y']) {
-                    //try move to top
-                    if($this->me['top'] || $this->me['y'] > 0){
-                        $this->me['direction'] == 'top';
-                        exit;
-                    }
-                } else {
-                    //try move to bottom
-                    if($this->me['bottom'] || $this->me['y'] < 7){
-                        $this->me['direction'] == 'bottom';
-                        exit;
-                    }
-                }
-            }
-        }
     }
 
     function findWeakEnemy()
