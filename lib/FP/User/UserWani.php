@@ -35,7 +35,7 @@ class UserWani extends \FP\Character\Character
         }
         $this->myTurn++;
 
-        if ($this->getHp() < 20) {
+        if ($this->getHp() < 10) {
             $direction = $this->getDirectionNullWay($map, $x, $y);
             return new Action('move', $direction);
         }
@@ -80,7 +80,7 @@ class UserWani extends \FP\Character\Character
         $shortestDistance = 100000;
         $shortestUser = $otherUsers[0];
         foreach ($otherUsers as $user) {
-            print_r($this->getDistance($user));
+            //print_r($this->getDistance($user));
             if ($shortestDistance > $this->getDistance($user)) {
                 $shortestDistance = $this->getDistance($user);
                 $shortestUser = $user;

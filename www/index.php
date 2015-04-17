@@ -6,13 +6,13 @@ ini_set("display_errors", 1);
 
 $map = new \FP\Map();
 
-$player01 = new \FP\User\Lhs($map, 1, 'Lhs', 1);
-$player02 = new \FP\User\UserA2($map, 2, 'A2', 1);
-$player03 = new \FP\User\UserTaeL($map, 3, 'TaeL', 1);
+$player01 = new \FP\User\UserA2($map, 1, 'A2', 1);
+$player02 = new \FP\User\UserM($map, 2, 'M', 1);
+$player03 = new \FP\User\UserBeer($map, 3, 'Beer', 1);
 
-$player04 = new \FP\User\UserM($map, 4, 'M', 2);
-$player05 = new \FP\User\UserWani($map, 5, 'Wani', 2);
-$player06 = new \FP\User\UserBeer($map, 6, 'Beer', 2);
+$player04 = new \FP\User\UserWani($map, 4, 'Wani', 2);
+$player05 = new \FP\User\UserTaeL($map, 5, 'TaeL', 2);
+$player06 = new \FP\User\Lhs($map, 6, 'Lhs', 2);
 
 $player_list = [
     $player01,
@@ -336,7 +336,7 @@ function gameOver() {
 
     for (var id in unitPlayerList) {
         var unitPlayer = unitPlayerList[id];
-        teamHp[unitPlayer.info.id] += unitPlayer.info.hp;
+        teamHp[unitPlayer.info.team] += unitPlayer.info.hp;
     }
 
     var msg = '';
@@ -354,7 +354,7 @@ function gameOver() {
 }
 
 var logPlay = new (function () {
-    var frameDelay = 20;
+    var frameDelay = 10;
     var frameCount = frameDelay;
 
     this.frame = function () {
@@ -407,6 +407,8 @@ function animate() {
 }
 
 $(function () {
+    alert('Game Start!');
+
     stage = new PIXI.Stage(0xFF00FF);
     renderer = PIXI.autoDetectRenderer(STAGE_WIDTH, STAGE_HEIGHT);
     document.getElementById('game-stage').appendChild(renderer.view);
