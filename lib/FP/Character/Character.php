@@ -82,5 +82,17 @@ abstract class Character
         }
     }
 
+    final public function breathing($auth)
+    {
+        if ($this->auth !== $auth) {
+            return;
+        }
+
+        $this->hp += 1;
+        if ($this->hp > 100) {
+            $this->hp = 100;
+        }
+    }
+
     abstract protected function _action($map_tiles, $pos_x, $pos_y);
 }

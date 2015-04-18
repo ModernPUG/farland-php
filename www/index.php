@@ -61,6 +61,7 @@ for ($turn_count = 0; $turn_count < 300; $turn_count++) {
             switch ($action->type) {
                 case 'move':
                     $map->moveCharacter($player, $action->direction);
+                    $player->breathing($auth);
                     $log_list[] = $player->info();
                     break;
 

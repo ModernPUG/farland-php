@@ -270,7 +270,7 @@ class UserA2 extends \FP\Character\Character
 
         // 위험하면
         if ($this->danger_count) {
-            if (!$enemy_count && $info['hp'] < 50) {
+            if (!$enemy_count && $info['hp'] < 100) {
                 return new \FP\Action('recovery', '');
             }
 
