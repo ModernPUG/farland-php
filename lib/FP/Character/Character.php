@@ -76,13 +76,9 @@ abstract class Character
             return;
         }
 
-        if ($this->hp >= 50) {
-            return;
-        }
-
-        $this->hp += rand(1, 2);
-        if ($this->hp > 50) {
-            $this->hp = 50;
+        $this->hp += rand(2, 3);
+        if ($this->hp > 100) {
+            $this->hp = 100;
         }
     }
 
