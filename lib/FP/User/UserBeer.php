@@ -1,5 +1,8 @@
 <?php
+
 namespace FP\User;
+
+use FP\Action;
 
 class UserBeer extends \FP\Character\Character
 {
@@ -8,129 +11,186 @@ class UserBeer extends \FP\Character\Character
 
     protected function _action($map_tiles, $pos_x, $pos_y)
     {
+        LogUtil::$debug = true;
+
         $this->currentTurn = $this->turnCount % 3;
         $this->turnCount++;
 
-    	//phpinfo();
-    	// 주변에 타팀이 붙어있는지 확인
-    	$nearEnemyDirection = $this->getNearEnemyDirection($map_tiles, $pos_x, $pos_y);
-    	if ( $nearEnemyDirection == null ) {
-    		// 이동
-    		$nextdirection = $this->getTargetEnemyDirection($map_tiles, $pos_x, $pos_y);
-    		return new \FP\Action('move', $nextdirection);
-    	} else {
-    		// 공격
-    		$nextdirection = $nearEnemyDirection;
-    		return new \FP\Action('attack', $nextdirection);
-    	}
-    }
+        // 붙어있는 적을 얻는다
+        $nearEnemyDirection = $this->getNearEnemyDirection($map_tiles, $pos_x, $pos_y);
 
-    private function getMyTeamNum()
-    {
-    	$info = $this->info();
-    	return $info['team'];
-    }
+        // 붙어있는 적이 있는지 확인
+        if ($nearEnemyDirection == null) {
 
-    private function isEnemy($map_tiles, $pos_y, $pos_x)
-    {
-    	$targetTypeNum = $map_tiles[$pos_y][$pos_x]['team'];
+            // 적당한 적을 찾기
+            $nextdirection = $this->getTargetEnemyDirection($map_tiles, $pos_x, $pos_y);
 
-    	// echo "me: ".$this->getMyTeamNum()."<br/>";
-    	// echo "target: ".($targetTypeNum === null ? "null" : $targetTypeNum)."<br/>";
-    	if ( $targetTypeNum == $this->getMyTeamNum() ) {
-    		return false;
-    	} else if ( $targetTypeNum == null ) {
-    		return false;
-    	}
-    	return true;
+            if ($nextdirection == null) {
+                // 적을 향해 가기 어려우면 쉰다
+                return new Action('recovery', '');
+            }
+
+            // 적을 향해 이동
+            return new Action('move', $nextdirection);
+        }
+
+        // 붙어있는 적을 공격
+        return new Action('attack', $nearEnemyDirection);
     }
 
     /**
-     * 적 찾기 (붙어있어서 때릴 애)
+     * 나에게 붙어있는 적 찾기
      */
-    private function getNearEnemyDirection($map_tiles, $pos_x, $pos_y) {
-    	$direction = 'top';
-        $numOfNearEnemy = 0;
-        if ( $this->validArrayPosition($pos_x, $pos_y - 1) && $this->isEnemy($map_tiles, $pos_y - 1, $pos_x) ) {
-    		$direction = 'top';
-            $numOfNearEnemy++;
-    	} else if ( $this->validArrayPosition($pos_x - 1, $pos_y) && $this->isEnemy($map_tiles, $pos_y, $pos_x - 1)) {
+    private function getNearEnemyDirection($map_tiles, $pos_x, $pos_y)
+    {
+        $direction = null;
+        if ($this->isEnemy($map_tiles, $pos_x, $pos_y - 1)) {
+            $direction = 'top';
+        } else if ($this->isEnemy($map_tiles, $pos_x - 1, $pos_y)) {
             $direction = 'left';
-            $numOfNearEnemy++;
-    	} else if ( $this->validArrayPosition($pos_x, $pos_y + 1) && $this->isEnemy($map_tiles, $pos_y + 1, $pos_x)) {
+        } else if ($this->isEnemy($map_tiles, $pos_x, $pos_y + 1)) {
             $direction = 'bottom';
-            $numOfNearEnemy++;
-    	} else if ( $this->validArrayPosition($pos_x + 1, $pos_y) && $this->isEnemy($map_tiles, $pos_y, $pos_x + 1))  {
+        } else if ($this->isEnemy($map_tiles, $pos_x + 1, $pos_y)) {
             $direction = 'right';
-            $numOfNearEnemy++;
-    	} else {
-            $direction = null;
         }
 
-    	return $direction;
-    }
-
-    private function validArrayPosition($pos_x, $pos_y)
-    {
-    	return ($pos_x >= 0 && $pos_x < 10 && $pos_y >= 0 && $pos_y < 8 );
-    }
-
-    private function isEnemyStrongerThanMe($map_tiles, $pos_x, $pos_y) {
-        $info = $this->info();
-        if ( $map_tiles[$y][$x]['hp'] >= $info['hp'] ) {
-            return true;
-        }
-        return false;
+        return $direction;
     }
 
     /**
-     * 적 찾기 (때릴려고 다가갈 가까운애)
+     * 나보다 약한 적 중에서 가까운 애 찾기
      */
-    private function getTargetEnemyDirection($map_tiles, $pos_x, $pos_y) {
-    	$enemyArray = [];
-    	for ( $y = 0 ; $y < 8 ; $y++ ) {
-    		for ( $x = 0 ; $x < 10 ; $x++ ) {
-    			if ( $this->isEnemy($map_tiles, $y, $x) ) {
-                    if ( $this->isEnemyStrongerThanMe($map_tiles, $y, $x) ) {
+    private function getTargetEnemyDirection($map_tiles, $pos_x, $pos_y)
+    {
+        $info = $this->info();
+
+        $enemyArray = [];
+        for ($y = 0; $y < 8; $y++) {
+
+            for ($x = 0; $x < 10; $x++) {
+
+                if ($this->isEnemy($map_tiles, $x, $y)) {
+
+                    if ($map_tiles[$y][$x]['hp'] >= $info['hp']) {
+                        // 나보다 강하므로 패스
                         continue;
                     }
-    				array_push($enemyArray, ['x' => $x, 'y' => $y, 'value' => abs($x - $pos_x) + abs($y - $pos_y)]);
+
+                    array_push($enemyArray, [
+                        'x' => $x,
+                        'y' => $y,
+                        'name' => $map_tiles[$y][$x]['name'],
+                        'value' => abs($x - $pos_x) + abs($y - $pos_y)
+                    ]);
                 }
-    		}
-    	}
+            }
+        }
 
-    	$this->aasort($enemyArray, "value");
-    	$target_x = $enemyArray[0]['x'];
-    	$target_y = $enemyArray[0]['y'];
-    	// echo "------------{<br/>";
-    	// echo nl2br(print_r($enemyArray, true))."<br/>";
-    	// echo "}------------<br/>";
+        if (sizeof($enemyArray) == 0) {
+            return null;
+        }
 
-    	$direction = "left";
-        if ( $target_x > $pos_x ) {
+        AUtil::aasort($enemyArray, "value");
+        $target_enemy = $enemyArray[0];
+        $target_x = $target_enemy['x'];
+        $target_y = $target_enemy['y'];
+
+        $direction = null;
+        if ($pos_x < $target_x) {
             $direction = "right";
-        } else if ( $target_x < $pos_x ) {
+        } else if ($pos_x > $target_x) {
             $direction = "left";
-        } else if ( $target_y > $pos_y ) { 
+        } else if ($pos_y < $target_y) {
             $direction = "bottom";
-        } else if ( $target_y < $pos_y ) { 
+        } else if ($pos_y > $target_y) {
             $direction = "top";
         }
 
-    	return $direction;
+        // 가려는데 아군 때문에 막혀있을 수 있으므로 못가면 쉰다
+        if ($direction == 'top' && $this->isTeam($map_tiles, $pos_x, $pos_y - 1)) {
+            return null;
+        } else if ($direction == 'left' && $this->isTeam($map_tiles, $pos_x - 1, $pos_y)) {
+            return null;
+        } else if ($direction == 'bottom' && $this->isTeam($map_tiles, $pos_x, $pos_y + 1)) {
+            return null;
+        } else if ($direction == 'right' && $this->isTeam($map_tiles, $pos_x + 1, $pos_y)) {
+            return null;
+        }
+
+        return $direction;
     }
 
-    private function aasort (&$array, $key) {
-	    $sorter=array();
-	    $ret=array();
-	    reset($array);
-	    foreach ($array as $ii => $va) {
-	        $sorter[$ii]=$va[$key];
-	    }
-	    asort($sorter);
-	    foreach ($sorter as $ii => $va) {
-	        $ret[$ii]=$array[$ii];
-	    }
-	    $array=$ret;
-		}
+    private function isEnemy($map_tiles, $pos_x, $pos_y)
+    {
+        if ($pos_x < 0 && $pos_x >= 10 && $pos_y < 0 && $pos_y >= 8) {
+            return false;
+        }
+
+        $myTeamNum = $this->info()['team'];
+        $targetTeamNum = $map_tiles[$pos_y][$pos_x]['team'];
+
+        if ($targetTeamNum == $myTeamNum) {
+            return false;
+        } else if ($targetTeamNum == null) {
+            return false;
+        }
+        return true;
+    }
+
+    private function isTeam($map_tiles, $pos_x, $pos_y)
+    {
+        if ($pos_x < 0 && $pos_x >= 10 && $pos_y < 0 && $pos_y >= 8) {
+            return false;
+        }
+
+        $myTeamNum = $this->info()['team'];
+        $targetTeamNum = $map_tiles[$pos_y][$pos_x]['team'];
+
+        if ($targetTeamNum == $myTeamNum) {
+            return true;
+        }
+
+        return false;
+    }
+}
+
+class LogUtil
+{
+    public static $debug = false;
+
+    public static function info($msg)
+    {
+        if (!self::$debug) {
+            return;
+        }
+
+        echo "$msg<br/>";
+    }
+
+    public static function info2($arr)
+    {
+        if (!self::$debug) {
+            return;
+        }
+
+        echo nl2br(print_r($arr, true))."<br/>";
+    }
+}
+
+class AUtil
+{
+    public static function aasort(&$array, $key)
+    {
+        $sorter = array();
+        $ret = array();
+        reset($array);
+        foreach ($array as $ii => $va) {
+            $sorter[$ii] = $va[$key];
+        }
+        asort($sorter);
+        foreach ($sorter as $ii => $va) {
+            $ret[$ii] = $array[$ii];
+        }
+        $array = $ret;
+    }
 }
